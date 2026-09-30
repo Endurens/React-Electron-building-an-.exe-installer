@@ -54,6 +54,21 @@ var PROMPT_4 =
 var PROMPT_ICON =
   "Своя иконка. Сделай иконку приложения: сгенерируй build/icon.ico размером 256x256 из logo.svg (или подготовь квадратный png и сконвертируй в .ico, например через electron-icon-builder или sharp). Укажи путь к иконке в секции \"win\" конфига electron-builder (\"win\": { \"icon\": \"build/icon.ico\" }) и пересобери npm run dist.";
 
+var PROMPT_3_MAC =
+  "Промпт 3 — установщик для macOS. Настрой сборку через electron-builder:\n" +
+  "1) Установи electron-builder в devDependencies.\n" +
+  "2) Добавь в package.json секцию \"build\":\n" +
+  "\"appId\": \"com.mycompany.myapp\" (придумай из имени приложения),\n" +
+  "\"productName\": имя приложения,\n" +
+  "\"directories\": { \"output\": \"release\" },\n" +
+  "\"files\": [\"dist/**/*\", \"electron/**/*\"],\n" +
+  "\"mac\": { \"target\": \"dmg\", \"category\": \"public.app-category.developer-tools\" }\n" +
+  "3) Добавь скрипт: \"dist\": \"npm run build && electron-builder --mac\".\n" +
+  "4) Выполни npm run dist и убедись, что в папке release появился образ .dmg; открой его, перетащи приложение в Applications и запусти — не пустое окно. Исправь все ошибки сборки.";
+
+var PROMPT_ICON_MAC =
+  "Промпт 5 — своя иконка (macOS). Сделай иконку приложения: подготовь build/icon.png размером 512x512 из logo.svg или квадратного logo.png (формат .ico нужен только для Windows — на macOS electron-builder сам сконвертирует png в .icns при сборке). Пересобери npm run dist и убедись, что приложение в Dock, Finder и alt-tab несёт твою иконку.";
+
 /* ---------- словарь терминов ---------- */
 
 var GLOSSARY = [
@@ -162,7 +177,8 @@ var STEPS = [
         bullets: [
           "concurrently запускает vite и Electron одновременно — окно и dev-сервер стартуют вместе",
           "wait-on tcp:5173 — Electron ждёт, пока dev-сервер реально поднимется",
-          "cross-env VITE_DEV_SERVER_URL=http://localhost:5173 — передаёт адрес внутрь Electron; окно грузит приложение по нему"
+          "cross-env VITE_DEV_SERVER_URL=http://localhost:5173 — передаёт адрес внутрь Electron; окно грузит приложение по нему",
+          "Скрипт одинаково работает на Windows и macOS — за это отвечает cross-env"
         ],
         expect: "Должно открыться десктоп-окно (не браузер!) с вашим приложением внутри",
         note: "Открылось пустое/белое окно значит base \"./\" не подхватился — отправьте opencode: «Белое окно, проверь base в vite.config.js и перезапусти electron:dev»"
@@ -173,23 +189,28 @@ var STEPS = [
     id: 4,
     icon: "📦",
     newContext: true,
-    tag: "ШАГ 3 · NSIS",
+    tag: "ШАГ 3 · УСТАНОВЩИК",
     tagClass: "tag-sky",
-    title: "NSIS-установщик: пакуем .exe",
-    subtitle: "electron-builder, секция build в package.json, команда dist",
+    title: "Установщик: пакуем .exe / .dmg",
+    subtitle: "electron-builder и секция build — с развилкой Windows / macOS",
     description:
-      "Окно работает — теперь делаем установщик. opencode поставит electron-builder и добавит секцию build в package.json: appId (компания-имя-приложения), productName (имя для установщика и ярлыков), directories.output — release (папка для результата), files — что именно пакуем (dist и electron), win.target — nsis, и опции установщика: oneClick false (мастер с «Далее», а не молниеносная установка), allowToChangeInstallationDirectory (пользователь сам выбирает папку), createDesktopShortcut (ярлык на рабочем столе). Скрипт dist собирает всё в цепочку: сначала обычная production-сборка, потом electron-builder --win. После — файл Setup.exe в папке release/.",
+      "Окно работает — теперь делаем установщик. opencode поставит electron-builder и добавит секцию build в package.json: appId (компания-имя-приложения), productName (имя для установщика и ярлыков), directories.output — release (папка для результата) и files — что именно пакуем (dist и electron). Дальше — развилка по системе: Windows собирает NSIS-мастер (.exe: oneClick false — мастер с «Далее», выбор папки установки, ярлык на рабочем столе), macOS — образ .dmg (приложение перетаскивается в Applications). Скрипт dist в обоих случаях делает цепочку: production-сборка, потом electron-builder --win или --mac. Выберите свою систему в переключателе ниже — промпт подставится нужный.",
     steps: [
       {
-        label: "Отправить промпт установщика",
-        description: "Скопируйте промпт и отправьте в opencode:",
-        prompt: PROMPT_3,
-        note: "Проверка: в package.json появилась секция build и скрипт dist; в папке release/ найдите файл вида *.exe Setup"
+        label: "Выбрать систему и отправить промпт",
+        description: "Переключите платформу и скопируйте промпт в opencode:",
+        promptOs: { win: PROMPT_3, mac: PROMPT_3_MAC },
+        noteOs: {
+          win: "Проверка: в package.json — секция build со строкой \"win\": { \"target\": \"nsis\" } и скрипт dist; в release/ — установочный .exe",
+          mac: "Проверка: в package.json — секция build со строкой \"mac\": { \"target\": \"dmg\" } и скрипт dist; в release/ — образ .dmg"
+        }
       },
       {
         label: "Поставить и проверить приложение",
-        description:
-          "Запустите Setup.exe из release/, установите как обычную программу и откройте. Приложение должно запуститься с полным интерфейсом — тем, что работал в окне Electron на прошлом шаге.",
+        descriptionOs: {
+          win: "Запустите Setup.exe из release/, установите как обычную программу и откройте. Приложение должно запуститься с полным интерфейсом — тем, что работал в окне Electron на прошлом шаге.",
+          mac: "Откройте .dmg из release/ и перетащите приложение в Applications, затем запустите из Launchpad или Finder. Интерфейс — тот же, что был в окне Electron на прошлом шаге."
+        },
         expect: "Если увидели белое окно — вернитесь на шаг 2: почти всегда это потерянный base \"./\"",
         note: "opencode сам прогонит сборку и сообщит, был ли билд рабочий. Не верьте докладу на слово — установите и посмотрите своими глазами"
       }
@@ -219,8 +240,8 @@ var STEPS = [
         bullets: [
           "npm run dev — dev-сервер поднялся, страница в браузере работает",
           "npm run electron:dev — десктоп-окно открылось, навигация внутри него не ломается",
-          "npm run dist — установщик .exe собрался и перезаписался в release/",
-          "Установка с Setup.exe — приложение открывается с контентом, не белое"
+          "npm run dist — установщик собрался и перезаписался в release/ (.exe на Windows, .dmg на macOS)",
+          "Установка прошла — приложение открывается с контентом, не белое"
         ],
         expect: "Любое расхождение — верните opencode к шагу, где проблема, с точным описанием того, что видите",
         note: "После этого шага миграция завершена — остаётся украшение: иконка"
@@ -233,22 +254,26 @@ var STEPS = [
     newContext: true,
     tag: "ОПЦИОНАЛЬНО",
     tagClass: "tag-amber",
-    title: "Своя иконка: logo.svg → build/icon.ico",
-    subtitle: "Убираем «стандартный Electron» из панели задач и с ярлыка",
+    title: "Своя иконка: логотип → .ico / .png",
+    subtitle: "Убираем «стандартный Electron» из панели задач, Dock и ярлыков",
     description:
-      "Без иконки electron-builder тихо поставит стандартную — приложение будет выглядеть шаблонно. У вас есть logo.svg или квадратный logo.png? Тогда одним промптом: opencode сгенерирует build/icon.ico 256×256 (виндовс-формат с несколькими размерами внутри) из вашего лого, пропишет путь в секцию win конфига electron-builder и пересоберёт установщик. Иконка появится на ярлыке, в панели задач и в alt-tab.",
+      "Без иконки electron-builder тихо поставит стандартную — приложение будет выглядеть шаблонно. У вас есть logo.svg или квадратный logo.png? Тогда одним промптом: opencode сгенерирует иконку нужного формата (Windows — build/icon.ico 256×256, macOS — build/icon.png 512×512), пропишет путь в конфиге и пересоберёт установщик. Иконка появится на ярлыке, в панели задач, в Dock и в alt-tab.",
     steps: [
       {
         label: "Подготовить исходник",
-        description:
-          "Положите в корень проекта logo.svg (вектор — лучший вариант, масштабируется без потерь) или квадратный logo.png не меньше 256×256. Прямоугольные иконки обрежутся некрасиво — заранее выровняйте.",
+        descriptionOs: {
+          win: "Положите в корень logo.svg (вектор — лучший вариант, масштабируется без потерь) или квадратный logo.png не меньше 256×256 — из него соберётся build/icon.ico. Прямоугольные иконки обрежутся некрасиво — заранее выровняйте.",
+          mac: "Положите в корень logo.svg или квадратный PNG не меньше 512×512 — он станет build/icon.png, а electron-builder сам сконвертирует его в .icns для Dock и Finder."
+        },
         note: "Нет лого? Пропустите шаг — установщик соберётся со стандартной иконкой Electron"
       },
       {
-        label: "Отправить промпт иконки",
-        description: "Скопируйте промпт и отправьте в opencode:",
-        prompt: PROMPT_ICON,
-        note: "Проверка: появился build/icon.ico; в секции win в package.json — строка icon; новый .exe в release/ показывает вашу иконку в проводнике"
+        label: "Выбрать систему и отправить промпт",
+        promptOs: { win: PROMPT_ICON, mac: PROMPT_ICON_MAC },
+        noteOs: {
+          win: "Проверка: появился build/icon.ico; в секции win в package.json — строка icon; новый .exe показывает вашу иконку в проводнике",
+          mac: "Проверка: появился build/icon.png 512×512; пересобранный .dmg несёт вашу иконку в Dock, Finder и alt-tab"
+        }
       }
     ]
   }
@@ -278,7 +303,7 @@ var TERM_GROUPS = [
       { term: "dev-сервер", def: "Локальный сервер разработки (npm run dev). Vite поднимает его на http://localhost:5173 — по этому адресу приложение доступно во время работы над кодом, и правки подхватываются без пересборки." },
       { term: "Production-сборка", def: "Окончательная версия для распространения (npm run build): файлы минифицируются, оптимизируются и складываются в dist/. Именно она пакуется в Electron, а не dev-сервер." },
       { term: "dist/", def: "Папка, куда Vite складывает production-сборку: index.html, .js, .css, картинки. Electron в «боевом» режиме загружает файл именно из неё: dist/index.html." },
-      { term: "release/", def: "Папка, в которую electron-builder кладёт готовый установщик: Setup .exe, вспомогательные файлы. Появляется после команды npm run dist." },
+      { term: "release/", def: "Папка, в которую electron-builder кладёт готовый установщик: Setup .exe (Windows) или образ .dmg (macOS). Появляется после команды npm run dist." },
       { term: "base: \"./\"", def: "Настройка Vite, при которой пути в собранном index.html становятся относительными (./assets/...), а не абсолютными (/assets/...). Критично для Electron: окно открывает файл с диска, и абсолютные пути ломаются — это первая причина «белого окна»." },
       { term: "Точка входа (entrypoint)", def: "Файл, с которого стартует выполнение. В веб-части React это src/main.jsx (или index.tsx/index.jsx в CRA — при миграции его нужно переименовать). У Electron своя точка входа — она задаётся полем main в package.json." },
       { term: "Белое (пустое) окно", def: "Типовая проблема: окно Electron открылось, а внутри ничего. Почти всегда — не задан base \"./\" в vite.config.js, либо main указывает не туда, либо окно загрузилось раньше dev-сервера." },
@@ -333,8 +358,8 @@ var SLIDES = [
     title: "React → Electron: сборка .exe",
     subtitle: "Презентация к пошаговой инструкции — всю работу выполняет opencode",
     blocks: [
-      { t: "lead", text: "Делаем из React-приложения настольную программу для Windows. Шесть шагов — шесть готовых промптов." },
-      { t: "chips", items: ["1 · Ревизия", "2 · Vite", "3 · Electron", "4 · NSIS", "5 · Проверка", "6 · Иконка"] },
+      { t: "lead", text: "Делаем из React-приложения настольную программу — под Windows и macOS. Шесть шагов — шесть готовых промптов." },
+      { t: "chips", items: ["1 · Ревизия", "2 · Vite", "3 · Electron", "4 · Установщик", "5 · Проверка", "6 · Иконка"] },
       { t: "note", text: "Каждый шаг — новая вкладка opencode: скопировали промпт → вставили → проверили результат." }
     ]
   },
@@ -357,11 +382,11 @@ var SLIDES = [
         "Ревизия — читаем package.json, ничего не меняем",
         "Vite — новый сборщик вместо устаревшего CRA",
         "Electron — настольное окно вокруг веб-приложения",
-        "NSIS — Setup .exe через electron-builder",
+        "Установщик — Setup .exe на Windows, .dmg на macOS",
         "Проверка — три команды и отчёт «что исправлено»",
-        "Иконка — фирменный build/icon.ico"
+        "Иконка — фирменный .ico / .png"
       ] },
-      { t: "expect", text: "Папка release/ с установочным .exe — и приложение, которое открывается с контентом" }
+      { t: "expect", text: "Папка release/ с установщиком — и приложение, которое открывается с контентом" }
     ]
   },
   {
@@ -475,27 +500,28 @@ var SLIDES = [
   {
     tag: "ТЕМА 4 · СУТЬ",
     tagClass: "tag-sky",
-    title: "NSIS-установщик",
-    subtitle: "Из папки с кодом — в Setup .exe",
+    title: "Установщик приложения",
+    subtitle: "electron-builder и развилка Windows / macOS",
     blocks: [
-      { t: "lead", text: "electron-builder пакует dist и обёртку в классический Windows-мастер установки." },
+      { t: "lead", text: "electron-builder пакует dist и обёртку в установщик. Какой именно — зависит от вашей системы." },
       { t: "bullets", items: [
         "appId и productName — идентификация в системе",
         "directories.output → release/ — папка установщика",
         "files: dist/**/* и electron/**/*",
-        "nsis: oneClick false, выбор папки, ярлык",
-        "Скрипт dist → npm run build + electron-builder --win"
+        "Скрипт dist → npm run build + electron-builder --win / --mac",
+        "Опции мастера зависят от системы — развилка ниже"
       ] },
-      { t: "note", text: "Проверка: в release/ появился Setup .exe, установка проходит, приложение открывается с контентом." }
+      { t: "osSplit", win: "NSIS-мастер: секция \"win\": { \"target\": \"nsis\" }, oneClick false, выбор папки, ярлык на рабочем столе. Сборка: electron-builder --win → Setup .exe", mac: "Образ .dmg: секция \"mac\": { \"target\": \"dmg\", \"category\": ... }. Сборка: electron-builder --mac → .dmg, приложение перетаскивается в Applications" },
+      { t: "note", text: "Проверка: в release/ появился установщик; установка проходит, приложение открывается с контентом." }
     ]
   },
   {
     tag: "ТЕМА 4 · ПРОМПТ 3",
     tagClass: "tag-sky",
-    title: "Промпт: NSIS-установщик",
-    subtitle: "Секция build в package.json",
+    title: "Промпт: установщик",
+    subtitle: "Секция build в package.json — под свою систему",
     blocks: [
-      { t: "prompt", text: PROMPT_3 },
+      { t: "promptOs", win: PROMPT_3, mac: PROMPT_3_MAC },
       { t: "note", text: "Белое окно после установки? Возвращаемся к base \"./\" в vite.config.js." }
     ]
   },
@@ -518,7 +544,7 @@ var SLIDES = [
       { t: "checks", items: [
         { t: "npm run dev", d: "страница в браузере работает" },
         { t: "npm run electron:dev", d: "окно открылось, навигация не сломалась" },
-        { t: "npm run dist", d: "установщик собрался без ошибок" },
+        { t: "npm run dist", d: "установщик собрался (.exe / .dmg)" },
         { t: "Установка", d: "приложение грузит контент, не белое окно" }
       ] },
       { t: "note", text: "Расхождение с докладом? Возвращайте opencode на нужный шаг." },
@@ -540,11 +566,11 @@ var SLIDES = [
     title: "Своя иконка",
     subtitle: "Убираем стандартный Electron",
     blocks: [
-      { t: "lead", text: "Есть logo.svg или квадратный PNG? Делаем фирменный .exe одним промптом. Нет лого — шаг пропускаем." },
+      { t: "lead", text: "Есть logo.svg или квадратный PNG? Делаем фирменный .exe / .dmg одним промптом. Нет лого — шаг пропускаем." },
       { t: "bullets", items: [
-        "Исходник: logo.svg или PNG ≥ 256×256",
-        "Генерация build/icon.ico 256×256",
-        "Конфиг: \"win\": { \"icon\": \"build/icon.ico\" }",
+        "Исходник: logo.svg или квадратный PNG",
+        "Windows: build/icon.ico 256×256 (sharp / electron-icon-builder)",
+        "macOS: build/icon.png 512×512 — .icns соберётся сам",
         "Пересборка npm run dist"
       ] },
       { t: "terms", label: "Термины темы", items: [tg(4, 0), tg(4, 1), tg(4, 2), tg(4, 3)] }
@@ -554,9 +580,9 @@ var SLIDES = [
     tag: "ТЕМА 6 · ПРОМПТ 5",
     tagClass: "tag-amber",
     title: "Промпт: своя иконка",
-    subtitle: "Иконка на ярлыке, в панели задач и alt-tab",
+    subtitle: "Иконка на ярлыке, в панели задач, в Dock и alt-tab",
     blocks: [
-      { t: "prompt", text: PROMPT_ICON }
+      { t: "promptOs", win: PROMPT_ICON, mac: PROMPT_ICON_MAC }
     ]
   },
   {
@@ -568,10 +594,10 @@ var SLIDES = [
       { t: "checks", items: [
         { t: "Проект на Vite", d: "dev-сервер и сборка в dist/" },
         { t: "Окно Electron", d: "main.cjs, два режима загрузки" },
-        { t: "NSIS-установщик", d: "npm run dist → Setup .exe" },
+        { t: "Установщик", d: "npm run dist → .exe / .dmg в release/" },
         { t: "Иконка", d: "фирменная, проверки зелёные" }
       ] },
-      { t: "lead", text: "Дальше: обновили код → подняли версию → npm run dist → свежий .exe готов к раздаче." },
+      { t: "lead", text: "Дальше: обновили код → подняли версию → npm run dist → свежий установщик готов к раздаче." },
       { t: "note", text: "Рабочие промпты — по кнопке «Лекция» в шапке. Успехов!" }
     ]
   }
@@ -584,6 +610,19 @@ var subChecked = loadJson(LS_PREFIX + "subchecked", {});
 var completedSet = {};
 completed.forEach(function (id) { completedSet[id] = true; });
 var glossaryOpen = true;
+
+var userOs = "win";
+try {
+  var savedOs = localStorage.getItem(LS_PREFIX + "os");
+  if (savedOs === "mac" || savedOs === "win") userOs = savedOs;
+} catch (e) {}
+
+function osSwitchHtml() {
+  return '<div class="os-switch" role="group" aria-label="Ваша операционная система">' +
+    '<button class="os-btn' + (userOs === "win" ? " active" : "") + '" data-os="win" data-stop="1" type="button">🪟 Windows</button>' +
+    '<button class="os-btn' + (userOs === "mac" ? " active" : "") + '" data-os="mac" data-stop="1" type="button">🍎 macOS</button>' +
+    "</div>";
+}
 
 function loadJson(key, fallback) {
   try {
@@ -715,15 +754,18 @@ function substepHtml(stepId, sub, idx) {
   html += '<div class="substep-content">';
   html += '<p class="substep-title">' + esc(sub.label) + "</p>";
   if (!checked) {
-    if (sub.description) html += '<p class="substep-text">' + esc(sub.description) + "</p>";
+    if (sub.promptOs || sub.descriptionOs || sub.noteOs) html += osSwitchHtml();
+    var desc = sub.descriptionOs ? sub.descriptionOs[userOs] : sub.description;
+    if (desc) html += '<p class="substep-text">' + esc(desc) + "</p>";
     if (sub.code) {
       html += '<div class="code-block"><button class="code-copy" data-copy="' + esc(sub.code).replace(/"/g, "&" + "quot;") + '" data-stop="1">' + svgCopy("") + "<span>копировать</span></button>" +
         "<pre><code>" + esc(sub.code) + "</code></pre></div>";
     }
-    if (sub.prompt) {
+    var promptVal = sub.promptOs ? sub.promptOs[userOs] : sub.prompt;
+    if (promptVal) {
       html += '<div class="prompt-block"><div class="prompt-head"><span class="prompt-head-label"><span>✦</span> промпт для opencode</span>' +
-        '<button class="copy-btn" data-copy="' + esc(sub.prompt).replace(/"/g, "&" + "quot;") + '" data-stop="1">' + svgCopy("") + "<span>копировать</span></button></div>" +
-        '<pre class="prompt-text">' + esc(sub.prompt) + "</pre></div>";
+        '<button class="copy-btn" data-copy="' + esc(promptVal).replace(/"/g, "&" + "quot;") + '" data-stop="1">' + svgCopy("") + "<span>копировать</span></button></div>" +
+        '<pre class="prompt-text">' + esc(promptVal) + "</pre></div>";
     }
     if (sub.bulletIntro) html += '<p class="substep-text" style="margin-top:8px">' + esc(sub.bulletIntro) + "</p>";
     if (sub.bullets) {
@@ -734,7 +776,8 @@ function substepHtml(stepId, sub, idx) {
     if (sub.expect) {
       html += '<div class="expect-line"><b>Ожидаемый результат:</b><span>' + esc(sub.expect) + "</span></div>";
     }
-    if (sub.note) html += '<p class="note"><b>→</b><span>' + esc(sub.note) + "</span></p>";
+    var noteVal = sub.noteOs ? sub.noteOs[userOs] : sub.note;
+    if (noteVal) html += '<p class="note"><b>→</b><span>' + esc(noteVal) + "</span></p>";
   }
   html += "</div></div></div>";
   return html;
@@ -800,14 +843,22 @@ function renderTopbarMode() {
   }
 }
 
+function promptBlockHtml(label, text) {
+  return '<div class="prompt-block"><div class="prompt-head"><span class="prompt-head-label"><span>✦</span> ' + esc(label || "промпт для opencode") + "</span>" +
+    '<button class="copy-btn" data-copy="' + esc(text).replace(/"/g, "&" + "quot;") + '" data-stop="1">' + svgCopy("") + "<span>копировать</span></button></div>" +
+    '<pre class="prompt-text">' + esc(text) + "</pre></div>";
+}
+
 function blockHtml(b) {
   if (b.t === "lead") return '<p class="slide-lead">' + esc(b.text) + "</p>";
   if (b.t === "chips") return '<div class="chain">' + b.items.map(function (c) { return '<span class="chip">' + esc(c) + "</span>"; }).join("") + "</div>";
   if (b.t === "bullets") return (b.intro ? '<p class="substep-text" style="margin-top:10px">' + esc(b.intro) + "</p>" : "") +
     '<ul class="bullets" style="margin-top:6px">' + b.items.map(function (x) { return '<li><i>✦</i><span>' + esc(x) + "</span></li>"; }).join("") + "</ul>";
-  if (b.t === "prompt") return '<div class="prompt-block"><div class="prompt-head"><span class="prompt-head-label"><span>✦</span> ' + esc(b.label || "промпт для opencode") + "</span>" +
-    '<button class="copy-btn" data-copy="' + esc(b.text).replace(/"/g, "&" + "quot;") + '" data-stop="1">' + svgCopy("") + "<span>копировать</span></button></div>" +
-    '<pre class="prompt-text">' + esc(b.text) + "</pre></div>";
+  if (b.t === "prompt") return promptBlockHtml(b.label, b.text);
+  if (b.t === "promptOs") return osSwitchHtml() + promptBlockHtml(null, userOs === "mac" ? b.mac : b.win);
+  if (b.t === "osSplit") return '<div class="os-split">' +
+    '<div class="os-card"><div class="os-card-head">🪟 Windows</div><p>' + esc(b.win) + "</p></div>" +
+    '<div class="os-card"><div class="os-card-head">🍎 macOS</div><p>' + esc(b.mac) + "</p></div></div>";
   if (b.t === "terms") return (b.label ? '<p class="terms-label">' + esc(b.label) + "</p>" : "") +
     '<div class="term-grid">' + b.items.map(function (it) {
     return '<div class="k-term"><h4>' + esc(it.term) + "</h4><p>" + it.def + "</p></div>";
@@ -882,6 +933,15 @@ document.addEventListener("click", function (e) {
       if (card) burst(card);
     }
     save(); renderAll();
+    return;
+  }
+  var osBtn = e.target.closest("[data-os]");
+  if (osBtn) {
+    e.stopPropagation();
+    userOs = osBtn.getAttribute("data-os");
+    try { localStorage.setItem(LS_PREFIX + "os", userOs); } catch (err) {}
+    renderAll();
+    if (presentationMode) renderPresentation();
     return;
   }
   var dot = e.target.closest("[data-slide]");

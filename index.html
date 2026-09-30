@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>React → Electron: пошаговая миграция</title>
-  <meta name="description" content="Пошаговый гайд: перевод React-проекта на Electron — от ревизии до NSIS-установщика .exe. Все команды и промпты для opencode, словарь ключевых терминов. Ничего не устанавливайте руками — всё делает opencode." />
+  <meta name="description" content="Пошаговый гайд: перевод React-проекта на Electron — от ревизии до установщика (.exe для Windows, .dmg для macOS). Все команды и промпты для opencode, словарь ключевых терминов. Ничего не устанавливайте руками — всё делает opencode." />
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
@@ -32,7 +32,7 @@
     <section class="hero animate-fade-up">
       <div class="pill"><span class="dot"></span><span>React × Electron × opencode</span></div>
       <h1>React → Electron:<br /><span class="shimmer-text">сборка .exe installer</span></h1>
-      <p class="lead">Сайт-инструкция для студентов: как из обычного React-приложения, собирающегося в браузер, сделать настольную программу для Windows. Шесть шагов: ревизия проекта → миграция на Vite → обёртка Electron → NSIS-установщик → финальная проверка → своя иконка. Каждый шаг — отдельный промпт для opencode: копировать, вставить, отправить, проверить результат. Ничего вручную в терминале не печатается — opencode выполняет команды сам. Прогресс отмечается по мере выполнения и сохраняется в браузере.</p>
+      <p class="lead">Сайт-инструкция для студентов: как из обычного React-приложения, собирающегося в браузер, сделать настольную программу для Windows и macOS. Шесть шагов: ревизия проекта → миграция на Vite → обёртка Electron → установщик (.exe на Windows, .dmg на macOS) → финальная проверка → своя иконка. Каждый шаг — отдельный промпт для opencode: копировать, вставить, отправить, проверить результат. Ничего вручную в терминале не печатается — opencode выполняет команды сам. Прогресс отмечается по мере выполнения и сохраняется в браузере.</p>
       <div class="chips" id="chips"></div>
     </section>
 
@@ -66,7 +66,7 @@
     <section class="final-banner animate-scale-in" id="finalBanner" style="display:none">
       <div class="emoji">🚀</div>
       <h3>Готово! У вас настольное приложение.</h3>
-      <p>React-проект переведён на Vite, обёрнут в Electron, собирается в NSIS-установщик и распространяется как один .exe. Окно открывается, роутер работает, билд не пустой, иконка — ваша. Дальше: обновляете код — обновляйте версию в package.json → npm run dist → новый установщик готов к раздаче.</p>
+      <p>React-проект переведён на Vite, обёрнут в Electron, собирается в установщик и распространяется как .exe (Windows) или .dmg (macOS). Окно открывается, роутер работает, билд не пустой, иконка — ваша. Дальше: обновляете код — обновляйте версию в package.json → npm run dist → новый установщик готов к раздаче.</p>
       <p style="margin-top:12px"><button class="done-btn" id="resetBtn" type="button">Сбросить прогресс</button></p>
     </section>
 
