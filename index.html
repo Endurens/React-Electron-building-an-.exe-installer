@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>React → Electron: пошаговая миграция</title>
+  <meta name="description" content="Пошаговый гайд: перевод React-проекта на Electron — от ревизии до NSIS-установщика .exe. Все команды и промпты для opencode, словарь ключевых терминов. Ничего не устанавливайте руками — всё делает opencode." />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <!-- Верхняя панель с прогрессом -->
+  <header class="topbar">
+    <div class="container">
+      <div class="progress-row">
+        <span class="progress-label" id="modeLabel">Прогресс лекции</span>
+        <span class="progress-right">
+          <span class="progress-count" id="progressCount">0/6 шагов</span>
+          <button class="mode-btn" id="modeToggle" type="button" title="Переключить режим">🎬 Презентация</button>
+        </span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="progressFill" style="width:0%"></div>
+      </div>
+      <p class="progress-hint" id="progressHint"></p>
+    </div>
+  </header>
+
+  <main class="container page-bottom">
+
+    <!-- Hero -->
+    <section class="hero animate-fade-up">
+      <div class="pill"><span class="dot"></span><span>React × Electron × opencode</span></div>
+      <h1>React → Electron:<br /><span class="shimmer-text">сборка .exe installer</span></h1>
+      <p class="lead">Сайт-инструкция для студентов: как из обычного React-приложения, собирающегося в браузер, сделать настольную программу для Windows. Шесть шагов: ревизия проекта → миграция на Vite → обёртка Electron → NSIS-установщик → финальная проверка → своя иконка. Каждый шаг — отдельный промпт для opencode: копировать, вставить, отправить, проверить результат. Ничего вручную в терминале не печатается — opencode выполняет команды сам. Прогресс отмечается по мере выполнения и сохраняется в браузере.</p>
+      <div class="chips" id="chips"></div>
+    </section>
+
+    <!-- Презентация (переключается кнопкой в шапке) -->
+    <section class="presentation" id="presentation" style="display:none">
+      <div class="slide-stage" id="slideStage"></div>
+      <div class="slide-nav">
+        <button class="nav-btn" id="slidePrev" type="button">← Назад</button>
+        <div class="slide-dots" id="slideDots"></div>
+        <button class="nav-btn" id="slideNext" type="button">Вперёд →</button>
+      </div>
+    </section>
+
+    <!-- Словарь терминов -->
+    <section class="glossary-banner">
+      <div class="glossary-head">
+        <div class="glossary-icon">📖</div>
+        <div>
+          <h2>Словарь студента</h2>
+          <p>Основные термины инструкции — в одной таблице. Необязательно читать до старта: наткнулись на непонятное слово в шаге — вернитесь сюда.</p>
+        </div>
+        <button class="glossary-toggle" id="glossaryToggle" type="button">Свернуть</button>
+      </div>
+      <div id="glossaryBody"></div>
+    </section>
+
+    <!-- Карточки шагов (рендерит js/app.js) -->
+    <section class="steps" id="steps"></section>
+
+    <!-- Финальный баннер -->
+    <section class="final-banner animate-scale-in" id="finalBanner" style="display:none">
+      <div class="emoji">🚀</div>
+      <h3>Готово! У вас настольное приложение.</h3>
+      <p>React-проект переведён на Vite, обёрнут в Electron, собирается в NSIS-установщик и распространяется как один .exe. Окно открывается, роутер работает, билд не пустой, иконка — ваша. Дальше: обновляете код — обновляйте версию в package.json → npm run dist → новый установщик готов к раздаче.</p>
+      <p style="margin-top:12px"><button class="done-btn" id="resetBtn" type="button">Сбросить прогресс</button></p>
+    </section>
+
+    <!-- Подвал -->
+    <footer class="footer">
+      <p class="mono">React → Electron Guide</p>
+      <p id="footerCount">0 из 6 выполнено</p>
+    </footer>
+
+  </main>
+
+  <script src="js/app.js"></script>
+</body>
+</html>
