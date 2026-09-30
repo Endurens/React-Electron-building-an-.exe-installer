@@ -324,6 +324,8 @@ var TERM_GROUPS = [
 
 /* ---------- слайды презентации ---------- */
 
+function tg(g, i) { return TERM_GROUPS[g].items[i]; }
+
 var SLIDES = [
   {
     tag: "СТАРТ",
@@ -331,168 +333,231 @@ var SLIDES = [
     title: "React → Electron: сборка .exe",
     subtitle: "Презентация к пошаговой инструкции — всю работу выполняет opencode",
     blocks: [
-      { t: "lead", text: "Из React-приложения, живущего в браузере, делаем настольную программу для Windows: окно Electron, production-сборка Vite и NSIS-установщик. Шесть шагов — шесть готовых промптов, каждый со своей проверкой результата." },
+      { t: "lead", text: "Делаем из React-приложения настольную программу для Windows. Шесть шагов — шесть готовых промптов." },
       { t: "chips", items: ["1 · Ревизия", "2 · Vite", "3 · Electron", "4 · NSIS", "5 · Проверка", "6 · Иконка"] },
-      { t: "note", text: "Каждый шаг — отдельный контекст opencode: новая вкладка → скопировали промпт → вставили → проверили результат. Термины разобраны отдельными слайдами в конце презентации." }
+      { t: "note", text: "Каждый шаг — новая вкладка opencode: скопировали промпт → вставили → проверили результат." }
+    ]
+  },
+  {
+    tag: "СТАРТ · ТЕРМИНЫ",
+    tagClass: "tag-violet",
+    title: "Кто есть кто",
+    subtitle: "Инструменты, с которыми будем работать",
+    blocks: [
+      { t: "terms", items: [tg(0, 0), tg(0, 1), tg(0, 6), tg(0, 7), tg(0, 8)] }
     ]
   },
   {
     tag: "МАРШРУТ",
     tagClass: "tag-indigo",
-    title: "Маршрут миграции за 6 шагов",
-    subtitle: "Что происходит на каждом этапе и что получается на выходе",
+    title: "Маршрут миграции",
+    subtitle: "Шесть шагов от браузера до установщика",
     blocks: [
       { t: "bullets", items: [
-        "Шаг 1 · Ревизия — opencode читает package.json и докладывает: сборщик, скрипты, имя/версия, где index.html. Ничего не меняет",
-        "Шаг 2 · Vite — миграция с CRA: vite + plugin-react, index.html в корень, script type=\"module\", новые скрипты, удаление react-scripts",
-        "Шаг 3 · Electron — electron/main.cjs с BrowserWindow 1280×800, скрипты electron:dev / electron:start, base \"./\"",
-        "Шаг 4 · NSIS — секция build в package.json и команда npm run dist → Setup .exe в папке release/",
-        "Шаг 5 · Проверка — три команды по кругу и отчёт «что проверено — что исправлено»",
-        "Шаг 6 · Иконка (опционально) — logo.svg → build/icon.ico 256×256"
+        "Ревизия — читаем package.json, ничего не меняем",
+        "Vite — новый сборщик вместо устаревшего CRA",
+        "Electron — настольное окно вокруг веб-приложения",
+        "NSIS — Setup .exe через electron-builder",
+        "Проверка — три команды и отчёт «что исправлено»",
+        "Иконка — фирменный build/icon.ico"
       ] },
-      { t: "expect", text: "Папка release/ с установочным .exe и установленное приложение, которое открывается с контентом" }
+      { t: "expect", text: "Папка release/ с установочным .exe — и приложение, которое открывается с контентом" }
+    ]
+  },
+  {
+    tag: "МАРШРУТ · ТЕРМИНЫ",
+    tagClass: "tag-indigo",
+    title: "Термины маршрута",
+    subtitle: "Как устроена сборка проекта",
+    blocks: [
+      { t: "terms", items: [tg(0, 2), tg(0, 3), tg(1, 0), tg(1, 2), tg(1, 3)] }
+    ]
+  },
+  {
+    tag: "ТЕМА 1 · СУТЬ",
+    tagClass: "tag-violet",
+    title: "Ревизия проекта",
+    subtitle: "Сначала смотрим, потом меняем",
+    blocks: [
+      { t: "lead", text: "opencode читает package.json — «паспорт» проекта — и докладывает четыре факта. Ничего не меняя." },
+      { t: "bullets", items: [
+        "Какой сборщик: Vite или react-scripts/CRA",
+        "Какие объявлены скрипты (scripts)",
+        "Имя и версия приложения",
+        "Где лежит index.html"
+      ] },
+      { t: "note", text: "Если сборщик уже Vite — следующий шаг пропускаем." },
+      { t: "terms", label: "Термины темы", items: [tg(3, 0), tg(3, 1), tg(3, 3)] }
     ]
   },
   {
     tag: "ТЕМА 1 · ПРОМПТ 0",
     tagClass: "tag-violet",
-    title: "Ревизия проекта",
-    subtitle: "Разведка перед миграцией: узнаём, что у вас на руках",
+    title: "Промпт: ревизия проекта",
+    subtitle: "Копируем и отправляем в opencode",
     blocks: [
-      { t: "lead", text: "Прежде чем менять что-то, смотрим, что есть. opencode читает package.json — «паспорт» проекта — и докладывает четыре факта, ни-че-го не меняя." },
-      { t: "bullets", items: [
-        "Какой стоит сборщик: Vite или react-scripts/CRA",
-        "Какие объявлены команды (scripts)",
-        "Имя и версия приложения (name, version)",
-        "Где физически лежит index.html"
-      ] },
       { t: "prompt", text: PROMPT_0 },
-      { t: "note", text: "Проверка: короткий доклад без единого изменения файлов. Если сборщик — Vite, следующий шаг пропускаем." }
+      { t: "note", text: "Проверка: короткий доклад — и ни один файл проекта не изменился." }
+    ]
+  },
+  {
+    tag: "ТЕМА 2 · СУТЬ",
+    tagClass: "tag-indigo",
+    title: "Перевод на Vite",
+    subtitle: "CRA устарел — официальный путь сегодня Vite",
+    blocks: [
+      { t: "lead", text: "opencode переносит проект на новый фундамент сборки — быстро и без ручной работы." },
+      { t: "bullets", items: [
+        "Ставит vite и @vitejs/plugin-react",
+        "Создаёт vite.config.js",
+        "index.html — в корень, script → type=\"module\"",
+        "Скрипты: dev / build / preview",
+        "Удаляет react-scripts, чинит REACT_APP_* и svg"
+      ] },
+      { t: "note", text: "Результат: npm run dev открывает приложение, npm run build создаёт dist/ без ошибок." }
     ]
   },
   {
     tag: "ТЕМА 2 · ПРОМПТ 1",
     tagClass: "tag-indigo",
-    title: "Перевод на Vite",
-    subtitle: "Новый фундамент сборки — быстро, современно, без react-scripts",
+    title: "Промпт: перевод на Vite",
+    subtitle: "Основной — и короткий, если Vite уже стоит",
     blocks: [
-      { t: "lead", text: "Create React App устарел (deprecated) и больше не поддерживается — официальный путь сегодня Vite: мгновенный dev-сервер и быстрая production-сборка." },
-      { t: "bullets", items: [
-        "Ставит vite и @vitejs/plugin-react в devDependencies",
-        "Создаёт vite.config.js с плагином react",
-        "Переносит index.html в корень, тег script → type=\"module\" src=\"/src/main.jsx\"",
-        "Обновляет скрипты: dev / build / preview",
-        "Удаляет react-scripts и конфиги CRA; чинит process.env.REACT_APP_* и импорты svg под Vite"
-      ] },
       { t: "prompt", text: PROMPT_1 },
-      { t: "prompt", label: "промпт — если проект уже на Vite", text: PROMPT_1_ALREADY_VITE },
-      { t: "note", text: "Проверка: npm run dev открывает приложение на localhost:5173, npm run build создаёт dist/ без ошибок." }
+      { t: "prompt", label: "промпт — если проект уже на Vite", text: PROMPT_1_ALREADY_VITE }
+    ]
+  },
+  {
+    tag: "ТЕМА 2 · ТЕРМИНЫ",
+    tagClass: "tag-indigo",
+    title: "Термины: Vite и сборка",
+    subtitle: "Что появляется на этом шаге",
+    blocks: [
+      { t: "terms", items: [tg(1, 1), tg(1, 8), tg(1, 5), tg(1, 6), tg(3, 2)] }
+    ]
+  },
+  {
+    tag: "ТЕМА 3 · СУТЬ",
+    tagClass: "tag-blue",
+    title: "Electron-обёртка",
+    subtitle: "React в настольном окне",
+    blocks: [
+      { t: "lead", text: "Окно Electron грузит ваш React: в разработке — с dev-сервера, в сборке — с диска." },
+      { t: "bullets", items: [
+        "Пакеты: electron, concurrently, wait-on, cross-env",
+        "electron/main.cjs — окно 1280×800, min 960×640",
+        "VITE_DEV_SERVER_URL → loadURL, иначе loadFile",
+        "package.json: \"main\" + скрипты electron:dev / electron:start",
+        "vite.config.js: base \"./\" — иначе в окне будет пусто"
+      ] },
+      { t: "note", text: "Проверка: npm run electron:dev открывает окно с работающим приложением." }
     ]
   },
   {
     tag: "ТЕМА 3 · ПРОМПТ 2",
     tagClass: "tag-blue",
-    title: "Electron-обёртка",
-    subtitle: "React в настольном окне: main-процесс и двойная загрузка",
+    title: "Промпт: Electron-обёртка",
+    subtitle: "Главный процесс в одном файле",
     blocks: [
-      { t: "lead", text: "Приложение получает настольную обёртку: окно Electron грузит ваш React — в разработке с dev-сервера, в сборке с диска." },
-      { t: "bullets", items: [
-        "devDependencies: electron, concurrently, wait-on, cross-env",
-        "electron/main.cjs — главный процесс: BrowserWindow 1280×800, min 960×640, заголовок из поля name",
-        "Двойная загрузка: есть VITE_DEV_SERVER_URL → loadURL (dev-сервер), нет → loadFile из dist/index.html",
-        "В package.json: поле \"main\" и скрипты electron:dev / electron:start",
-        "В vite.config.js: base \"./\" — относительные пути, иначе в окне будет пусто"
-      ] },
       { t: "prompt", text: PROMPT_2 },
-      { t: "note", text: "Проверка: npm run electron:dev открывает окно с работающим приложением; wait-on держит паузу, пока не поднимется порт 5173." }
+      { t: "note", text: "wait-on держит паузу, пока не поднимется порт 5173 — окно не откроется раньше приложения." }
+    ]
+  },
+  {
+    tag: "ТЕМА 3 · ТЕРМИНЫ",
+    tagClass: "tag-blue",
+    title: "Термины: внутри Electron",
+    subtitle: "Как устроено окно изнутри",
+    blocks: [
+      { t: "terms", items: [tg(2, 0), tg(2, 1), tg(2, 2), tg(2, 3), tg(2, 4), tg(2, 5), tg(2, 6)] }
+    ]
+  },
+  {
+    tag: "ТЕМА 4 · СУТЬ",
+    tagClass: "tag-sky",
+    title: "NSIS-установщик",
+    subtitle: "Из папки с кодом — в Setup .exe",
+    blocks: [
+      { t: "lead", text: "electron-builder пакует dist и обёртку в классический Windows-мастер установки." },
+      { t: "bullets", items: [
+        "appId и productName — идентификация в системе",
+        "directories.output → release/ — папка установщика",
+        "files: dist/**/* и electron/**/*",
+        "nsis: oneClick false, выбор папки, ярлык",
+        "Скрипт dist → npm run build + electron-builder --win"
+      ] },
+      { t: "note", text: "Проверка: в release/ появился Setup .exe, установка проходит, приложение открывается с контентом." }
     ]
   },
   {
     tag: "ТЕМА 4 · ПРОМПТ 3",
     tagClass: "tag-sky",
-    title: "NSIS-установщик",
-    subtitle: "Из папки с кодом — в Setup .exe для Windows",
+    title: "Промпт: NSIS-установщик",
+    subtitle: "Секция build в package.json",
     blocks: [
-      { t: "lead", text: "electron-builder пакует dist и electron-обёртку в классический Windows-установщик с мастером «Далее → Далее → Готово»." },
-      { t: "bullets", items: [
-        "appId — уникальный ID (com.company.app), productName — имя в системе",
-        "directories.output → release: сюда упадёт готовый Setup .exe",
-        "files: dist/**/* и electron/**/* — что именно пакуем",
-        "win.target nsis + опции: oneClick false, выбор папки установки, ярлык на рабочем столе",
-        "Скрипт dist: npm run build && electron-builder --win"
-      ] },
       { t: "prompt", text: PROMPT_3 },
-      { t: "note", text: "Проверка: в release/ появился установочный .exe; установка проходит, приложение запускается с контентом. Белое окно — вернитесь к base \"./\"." }
+      { t: "note", text: "Белое окно после установки? Возвращаемся к base \"./\" в vite.config.js." }
+    ]
+  },
+  {
+    tag: "ТЕМА 4 · ТЕРМИНЫ",
+    tagClass: "tag-sky",
+    title: "Термины: установщик и команды",
+    subtitle: "Что настраиваем на этом шаге",
+    blocks: [
+      { t: "terms", items: [tg(0, 4), tg(0, 5), tg(1, 4), tg(3, 4), tg(3, 5), tg(3, 6), tg(3, 7), tg(3, 8)] }
+    ]
+  },
+  {
+    tag: "ТЕМА 5 · СУТЬ",
+    tagClass: "tag-green",
+    title: "Финальная проверка",
+    subtitle: "Четыре пункта — лично своими глазами",
+    blocks: [
+      { t: "lead", text: "opencode прогоняет все команды и проверяет навигацию. Доклад — списком «что проверено — что исправлено»." },
+      { t: "checks", items: [
+        { t: "npm run dev", d: "страница в браузере работает" },
+        { t: "npm run electron:dev", d: "окно открылось, навигация не сломалась" },
+        { t: "npm run dist", d: "установщик собрался без ошибок" },
+        { t: "Установка", d: "приложение грузит контент, не белое окно" }
+      ] },
+      { t: "note", text: "Расхождение с докладом? Возвращайте opencode на нужный шаг." },
+      { t: "terms", label: "Термины темы", items: [tg(1, 7)] }
     ]
   },
   {
     tag: "ТЕМА 5 · ПРОМПТ 4",
     tagClass: "tag-green",
-    title: "Финальная проверка",
-    subtitle: "Три команды, роутер и отчёт «что проверено — что исправлено»",
+    title: "Промпт: финальная проверка",
+    subtitle: "Один прогон — один отчёт",
     blocks: [
-      { t: "lead", text: "Финальный контроль всей миграции: opencode прогоняет все команды по очереди, проверяет навигацию и отчитывается списком." },
-      { t: "checks", items: [
-        { t: "npm run dev", d: "dev-сервер поднялся, страница в браузере работает" },
-        { t: "npm run electron:dev", d: "десктоп-окно открылось, навигация внутри не ломается" },
-        { t: "npm run dist", d: "NSIS-установщик собирается без ошибок" },
-        { t: "Установка", d: "после установки приложение грузит контент, не белое окно" }
-      ] },
-      { t: "prompt", text: PROMPT_4 },
-      { t: "note", text: "Расхождение доклада с реальностью? Возвращайте opencode на нужный шаг с точным описанием того, что видите." }
+      { t: "prompt", text: PROMPT_4 }
     ]
   },
   {
-    tag: "ТЕМА 6 · ОПЦИЯ",
+    tag: "ТЕМА 6 · СУТЬ",
     tagClass: "tag-amber",
     title: "Своя иконка",
-    subtitle: "logo.svg → build/icon.ico: убираем стандартный Electron",
+    subtitle: "Убираем стандартный Electron",
     blocks: [
-      { t: "lead", text: "Без иконки electron-builder тихо поставит стандартную. Есть лого — делаем фирменный .exe одним промптом." },
+      { t: "lead", text: "Есть logo.svg или квадратный PNG? Делаем фирменный .exe одним промптом. Нет лого — шаг пропускаем." },
       { t: "bullets", items: [
-        "Исходник: logo.svg (идеально) или квадратный PNG ≥ 256×256",
-        "Генерация build/icon.ico 256×256 — через electron-icon-builder или sharp",
-        "Путь в конфиге: \"win\": { \"icon\": \"build/icon.ico\" }",
-        "Пересборка npm run dist — иконка на ярлыке, в панели задач и в alt-tab"
+        "Исходник: logo.svg или PNG ≥ 256×256",
+        "Генерация build/icon.ico 256×256",
+        "Конфиг: \"win\": { \"icon\": \"build/icon.ico\" }",
+        "Пересборка npm run dist"
       ] },
-      { t: "prompt", text: PROMPT_ICON },
-      { t: "note", text: "Нет лого? Шаг можно пропустить — установщик соберётся со стандартной иконкой Electron." }
+      { t: "terms", label: "Термины темы", items: [tg(4, 0), tg(4, 1), tg(4, 2), tg(4, 3)] }
     ]
   },
   {
-    tag: "ТЕРМИНЫ 1/5",
-    tagClass: "tag-violet",
-    title: TERM_GROUPS[0].title,
-    subtitle: "Кто есть кто в этой инструкции",
-    blocks: [ { t: "terms", items: TERM_GROUPS[0].items } ]
-  },
-  {
-    tag: "ТЕРМИНЫ 2/5",
-    tagClass: "tag-indigo",
-    title: TERM_GROUPS[1].title,
-    subtitle: "Сборщик, dev-сервер, сборка и папки",
-    blocks: [ { t: "terms", items: TERM_GROUPS[1].items } ]
-  },
-  {
-    tag: "ТЕРМИНЫ 3/5",
-    tagClass: "tag-blue",
-    title: TERM_GROUPS[2].title,
-    subtitle: "Главный процесс, окно и загрузка интерфейса",
-    blocks: [ { t: "terms", items: TERM_GROUPS[2].items } ]
-  },
-  {
-    tag: "ТЕРМИНЫ 4/5",
-    tagClass: "tag-sky",
-    title: TERM_GROUPS[3].title,
-    subtitle: "Паспорт проекта и npm-команды",
-    blocks: [ { t: "terms", items: TERM_GROUPS[3].items } ]
-  },
-  {
-    tag: "ТЕРМИНЫ 5/5",
+    tag: "ТЕМА 6 · ПРОМПТ 5",
     tagClass: "tag-amber",
-    title: TERM_GROUPS[4].title,
-    subtitle: "Форматы, с которыми вы столкнётесь",
-    blocks: [ { t: "terms", items: TERM_GROUPS[4].items } ]
+    title: "Промпт: своя иконка",
+    subtitle: "Иконка на ярлыке, в панели задач и alt-tab",
+    blocks: [
+      { t: "prompt", text: PROMPT_ICON }
+    ]
   },
   {
     tag: "ИТОГ",
@@ -501,13 +566,13 @@ var SLIDES = [
     subtitle: "И что делать дальше",
     blocks: [
       { t: "checks", items: [
-        { t: "Проект на Vite", d: "dev-сервер и сборка в dist/ работают" },
-        { t: "Окно Electron", d: "main.cjs + два режима загрузки: dev-сервер и dist" },
-        { t: "NSIS-установщик", d: "npm run dist → release/Setup .exe" },
-        { t: "Иконка", d: "фирменная, роутер работает, проверки зелёные" }
+        { t: "Проект на Vite", d: "dev-сервер и сборка в dist/" },
+        { t: "Окно Electron", d: "main.cjs, два режима загрузки" },
+        { t: "NSIS-установщик", d: "npm run dist → Setup .exe" },
+        { t: "Иконка", d: "фирменная, проверки зелёные" }
       ] },
-      { t: "lead", text: "Что дальше: обновляете код → поднимаете версию в package.json → npm run dist → свежий .exe готов к раздаче пользователям." },
-      { t: "note", text: "Вернуться к рабочим промптам — кнопка «Лекция» в шапке. Успехов!" }
+      { t: "lead", text: "Дальше: обновили код → подняли версию → npm run dist → свежий .exe готов к раздаче." },
+      { t: "note", text: "Рабочие промпты — по кнопке «Лекция» в шапке. Успехов!" }
     ]
   }
 ];
@@ -743,7 +808,8 @@ function blockHtml(b) {
   if (b.t === "prompt") return '<div class="prompt-block"><div class="prompt-head"><span class="prompt-head-label"><span>✦</span> ' + esc(b.label || "промпт для opencode") + "</span>" +
     '<button class="copy-btn" data-copy="' + esc(b.text).replace(/"/g, "&" + "quot;") + '" data-stop="1">' + svgCopy("") + "<span>копировать</span></button></div>" +
     '<pre class="prompt-text">' + esc(b.text) + "</pre></div>";
-  if (b.t === "terms") return '<div class="term-grid">' + b.items.map(function (it) {
+  if (b.t === "terms") return (b.label ? '<p class="terms-label">' + esc(b.label) + "</p>" : "") +
+    '<div class="term-grid">' + b.items.map(function (it) {
     return '<div class="k-term"><h4>' + esc(it.term) + "</h4><p>" + it.def + "</p></div>";
   }).join("") + "</div>";
   if (b.t === "checks") return '<div class="check-grid">' + b.items.map(function (c) {
@@ -786,7 +852,7 @@ function goSlide(delta) {
 function setMode(pres) {
   presentationMode = pres;
   document.body.classList.toggle("presentation-mode", pres);
-  document.getElementById("presentation").style.display = pres ? "block" : "none";
+  document.getElementById("presentation").style.display = pres ? "flex" : "none";
   var btn = document.getElementById("modeToggle");
   btn.textContent = pres ? "📖 Лекция" : "🎬 Презентация";
   btn.classList.toggle("active", pres);

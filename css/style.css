@@ -317,19 +317,32 @@ body.presentation-mode .steps,
 body.presentation-mode .final-banner,
 body.presentation-mode .footer { display: none; }
 
-.presentation { margin-top: 24px; }
+/* полноэкранный каркас: слайд занимает всё окно, шапка и навигация закреплены */
+body.presentation-mode { min-height: 100vh; display: flex; flex-direction: column; }
+body.presentation-mode main.container {
+  max-width: none; flex: 1; display: flex; flex-direction: column;
+  padding: 16px 16px 14px;
+}
+@media (min-width: 900px) { body.presentation-mode main.container { padding: 20px 36px 16px; } }
+
+.presentation { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.slide-stage { flex: 1; min-height: 0; display: flex; flex-direction: column; }
 .slide-card {
-  border-radius: 16px; border: 1px solid var(--border); background: #fff; padding: 24px;
+  flex: 1; min-height: 0; display: flex; flex-direction: column;
+  border-radius: 20px; border: 1px solid var(--border); background: #fff; padding: 22px;
   animation: fade-up 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .slide-meta { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 4px; }
 .slide-card h2 { margin: 6px 0 0; font-size: 20px; font-weight: 600; line-height: 1.3; color: var(--fg); }
 .slide-lead { margin: 12px 0 0; font-size: 15px; color: #555550; line-height: 1.7; }
-.slide-body { margin-top: 14px; border-top: 1px solid var(--muted); padding-top: 14px; max-height: min(58vh, 560px); overflow-y: auto; padding-right: 8px; }
+.slide-body {
+  flex: 1; min-height: 0; overflow-y: auto;
+  margin-top: 14px; border-top: 1px solid var(--muted); padding-top: 16px; padding-right: 10px;
+}
 .slide-body > :first-child { margin-top: 0; }
 .chain { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
 
-.slide-nav { margin-top: 14px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.slide-nav { margin-top: 12px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .nav-btn {
   padding: 10px 18px; border-radius: 12px; border: none; cursor: pointer;
   font-size: 14px; font-weight: 600; font-family: var(--font-sans);
@@ -343,8 +356,65 @@ body.presentation-mode .footer { display: none; }
 .dot-nav:hover { background: var(--faint); }
 .dot-nav.active { width: 22px; background: var(--accent); }
 
+/* типографика презентации — крупно для проектора */
+.presentation .slide-card h2 { font-size: 28px; }
+.presentation .step-sub { font-size: 16px; }
+.presentation .slide-lead { font-size: 19px; line-height: 1.65; }
+.presentation .bullets { gap: 8px; }
+.presentation .bullets li { font-size: 18px; line-height: 1.6; }
+.presentation .bullets li i { font-size: 14px; }
+.presentation .note { font-size: 14px; line-height: 1.6; }
+.presentation .prompt-head-label { font-size: 13px; }
+.presentation .prompt-text { font-size: 15px; line-height: 1.75; }
+.presentation .terms-label { font-size: 12px; }
+.presentation .k-term { padding: 16px 18px; border-radius: 14px; }
+.presentation .k-term h4 { font-size: 17px; }
+.presentation .k-term p { font-size: 14.5px; line-height: 1.6; }
+.presentation .check-item { font-size: 15px; padding: 14px 16px; }
+.presentation .check-item b { font-size: 16px; }
+.presentation .chip { font-size: 14px; padding: 8px 16px; }
+.presentation .nav-btn { font-size: 15px; padding: 12px 24px; }
+.presentation .tag { font-size: 12.5px; padding: 3px 10px; }
+.presentation .step-num { font-size: 14px; }
+
+/* адаптация под большие экраны и проектор */
+@media (min-width: 1100px) {
+  .presentation .slide-card { padding: 44px 56px; border-radius: 28px; }
+  .presentation .slide-card h2 { font-size: 40px; }
+  .presentation .step-sub { font-size: 21px; }
+  .presentation .slide-lead { font-size: 24px; }
+  .presentation .slide-body { margin-top: 20px; padding-top: 24px; }
+  .presentation .bullets { gap: 12px; }
+  .presentation .bullets li { font-size: 22px; }
+  .presentation .bullets li i { font-size: 16px; }
+  .presentation .note { font-size: 17px; }
+  .presentation .prompt-head-label { font-size: 15px; }
+  .presentation .prompt-text { font-size: 17px; }
+  .presentation .prompt-block { border-radius: 16px; }
+  .presentation .terms-label { font-size: 14px; margin: 18px 0 12px; }
+  .presentation .term-grid { grid-template-columns: 1fr 1fr; gap: 14px; }
+  .presentation .k-term { padding: 20px 22px; border-radius: 16px; }
+  .presentation .k-term h4 { font-size: 21px; }
+  .presentation .k-term p { font-size: 16.5px; line-height: 1.65; }
+  .presentation .check-grid { grid-template-columns: 1fr 1fr; gap: 14px; }
+  .presentation .check-item { font-size: 18px; padding: 18px 20px; }
+  .presentation .check-item b { font-size: 20px; }
+  .presentation .chip { font-size: 16px; padding: 10px 20px; }
+  .presentation .nav-btn { font-size: 18px; padding: 14px 30px; border-radius: 14px; }
+  .presentation .tag { font-size: 15px; padding: 5px 14px; }
+  .presentation .step-num { font-size: 16px; }
+  .presentation .slide-dots { gap: 9px; }
+  .presentation .dot-nav { width: 10px; height: 10px; }
+  .presentation .dot-nav.active { width: 26px; }
+}
+
 .term-grid { display: grid; grid-template-columns: 1fr; gap: 10px; margin-top: 4px; }
 @media (min-width: 600px) { .term-grid { grid-template-columns: 1fr 1fr; } }
+.terms-label {
+  font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--accent); margin: 14px 0 8px;
+}
+.terms-label + .term-grid { margin-top: 0; }
 .k-term { border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; background: #fff; transition: border-color 0.25s; }
 .k-term:hover { border-color: var(--accent-border); }
 .k-term h4 { margin: 0; font-size: 13.5px; font-weight: 600; color: var(--accent-dark); }
